@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import ProductItem from "../components/ProductItem";
-
+import requests from "../api/apiClient";
 export default function ProductDetail() {
   const { id } = useParams();
   const [isLoading, setIsLoading] = useState(true);
@@ -10,8 +10,8 @@ export default function ProductDetail() {
   useEffect(() => {
     async function fetchProductDetail() {
       try {
-        const response = await fetch(`http://localhost:5001/products/${id}`);
-        const data = await response.json();
+        const data = await requests.products.detail(id);
+
         setProduct(data);
       } catch (error) {
         console.error("Product detail fetching error:", error);

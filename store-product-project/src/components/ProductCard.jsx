@@ -12,9 +12,27 @@ import {
 import { Link } from "react-router-dom";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import { currenyTRY } from "../utils/format";
+import { currenyTRY } from "../utils/formats";
+import { useCartContext } from "../context/CartContext";
+import requests from "../api/apiClient";
+import { useState } from "react";
 
 export default function ProductCard({ product }) {
+  const { setCart } = useCartContext();
+  const [loading, setLoading] = useState(false);
+
+  const handleAddToCart = async () => {
+    setLoading(true);
+    try {
+      const updatedCart = await requests.cart.addItem(product.id);
+      setCart(updatedCart);
+    } catch (error) {
+      console.error("Sepete eklenirken hata:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Card
       sx={{
@@ -76,12 +94,14 @@ export default function ProductCard({ product }) {
             variant="contained"
             color="primary"
             size="large"
+            onClick={handleAddToCart}
+            disabled={loading}
             sx={{
               minWidth: "120px",
               height: "40px",
             }}
           >
-            Sepete Ekle
+            {loading ? "Ekleniyor..." : "Sepete Ekle"}
           </Button>
         </Box>
       </CardActions>
