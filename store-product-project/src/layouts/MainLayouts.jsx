@@ -1,11 +1,13 @@
 import { Outlet } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import { Container } from "@mui/material";
 export default function MainLayout() {
   return (
     <div className="container">
       <Navbar />
-      <h1>MainLayout</h1>
-      <Outlet />
+      <Container sx={{ padding: 2 }}>
+        <Outlet />
+      </Container>
     </div>
   );
 }
