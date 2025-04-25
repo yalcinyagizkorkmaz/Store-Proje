@@ -89,16 +89,23 @@ async function replace(id, cart) {
 async function cartToDTO(cart) {
   const data = await readData();
 
-  let items = cart.cartItems.map((item) => ({
-    id: item.id,
-    product: {
-      productId: item.productId,
+  let items = cart.cartItems.map((item) => {
+    const product = data.products.find((p) => p.id === item.productId);
+    if (!product) {
+      console.error(`Ürün bulunamadı: ${item.productId}`);
+      return null;
+    }
+    return {
+      id: item.id,
+      product: {
+        id: product.id,
+        title: product.title,
+        price: product.price,
+        image: product.image,
+      },
       quantity: item.quantity,
-      title: data.products.find((p) => p.id === item.productId).title,
-      price: data.products.find((p) => p.id === item.productId).price,
-      image: data.products.find((p) => p.id === item.productId).image,
-    },
-  }));
+    };
+  }).filter(item => item !== null);
 
   cart.cartItems = items;
   return cart;
