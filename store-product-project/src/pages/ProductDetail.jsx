@@ -9,18 +9,20 @@ import {
   IconButton,
   Paper,
   Divider,
+  Alert,
 } from "@mui/material";
 import { useCartContext } from "../context/CartContext";
 import { currenyTRY } from "../utils/formats";
 import requests from "../api/apiClient";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import InfoIcon from "@mui/icons-material/Info";
 
 export default function ProductDetail() {
   const { id } = useParams();
   const [isLoading, setIsLoading] = useState(true);
   const [product, setProduct] = useState(null);
-  const { setCart } = useCartContext();
+  const { cart, setCart } = useCartContext();
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -49,85 +51,66 @@ export default function ProductDetail() {
     }
   };
 
+  const getCartItemQuantity = () => {
+    if (!cart || !cart.cartItems) return 0;
+    const cartItem = cart.cartItems.find(
+      (item) => item.product.id === product?.id
+    );
+    return cartItem ? cartItem.quantity : 0;
+  };
+
   if (isLoading) return <div>Yükleniyor...</div>;
   if (!product) return <div>Ürün bulunamadı</div>;
 
+  const cartQuantity = getCartItemQuantity();
+
   return (
-    <Container sx={{ py: 4 }}>
+    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       <Grid container spacing={4}>
         <Grid item xs={12} md={6}>
-          <Paper
-            elevation={0}
+          <Box
+            component="img"
+            src={`http://localhost:5001/images/${product.image}`}
+            alt={product.title}
             sx={{
               width: "100%",
-              height: "500px",
-              backgroundColor: "#f5f5f5",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              p: 2,
+              height: "auto",
+              objectFit: "cover",
+              borderRadius: 2,
             }}
-          >
-            <img
-              src={`http://localhost:5001/images/${product.image}`}
-              alt={product.title}
-              style={{
-                maxWidth: "100%",
-                maxHeight: "100%",
-                objectFit: "contain",
-              }}
-            />
-          </Paper>
+          />
         </Grid>
         <Grid item xs={12} md={6}>
-          <Box sx={{ p: 2 }}>
+          <Paper elevation={3} sx={{ p: 3 }}>
             <Typography variant="h4" gutterBottom>
               {product.title}
             </Typography>
             <Typography variant="h5" color="primary" gutterBottom>
-              {currenyTRY.format(product.price)}
+              {currenyTRY.format(parseInt(product.price))}
             </Typography>
-            <Box sx={{ display: "flex", gap: 2, mt: 4, mb: 4 }}>
-              <IconButton size="large">
-                <FavoriteBorderIcon fontSize="large" />
-              </IconButton>
-              <Button
-                variant="contained"
-                color="primary"
-                size="large"
-                onClick={handleAddToCart}
-                disabled={loading}
-                sx={{ minWidth: "200px" }}
-              >
-                {loading ? "Ekleniyor..." : "Sepete Ekle"}
-              </Button>
-            </Box>
-          </Box>
-        </Grid>
-        <Grid item xs={12}>
-          <Divider sx={{ my: 3 }} />
-          <Box sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              Ürün Açıklaması
-            </Typography>
+            <Divider sx={{ my: 2 }} />
             <Typography variant="body1" paragraph>
               {product.description}
             </Typography>
-          </Box>
-          <Box sx={{ mt: 3, p: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              Ürün Detayları
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              • Kategori: {product.category}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              • Stok Durumu: {product.stock > 0 ? "Stokta Var" : "Stokta Yok"}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              • Ürün Kodu: {product.id}
-            </Typography>
-          </Box>
+            {cartQuantity > 0 && (
+              <Alert icon={<InfoIcon />} severity="info" sx={{ mb: 2 }}>
+                Bu üründen sepette {cartQuantity} adet bulunmaktadır.
+              </Alert>
+            )}
+            <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleAddToCart}
+                disabled={loading}
+              >
+                {loading ? "Ekleniyor..." : "Sepete Ekle"}
+              </Button>
+              <IconButton color="primary">
+                <FavoriteBorderIcon />
+              </IconButton>
+            </Box>
+          </Paper>
         </Grid>
       </Grid>
     </Container>

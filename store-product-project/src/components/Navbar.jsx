@@ -15,6 +15,7 @@ import { NavLink } from "react-router";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { Link } from "react-router-dom";
 import MenuIcon from "@mui/icons-material/Menu";
+import { useCartContext } from "../context/CartContext";
 
 export default function Navbar() {
   const links = [
@@ -28,6 +29,11 @@ export default function Navbar() {
   ];
 
   const [anchorElNav, setAnchorElNav] = React.useState(null);
+
+  const { cart } = useCartContext();
+  const cartItemCount = cart
+    ? cart.cartItems.reduce((total, item) => total + item.quantity, 0)
+    : 0;
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -63,7 +69,7 @@ export default function Navbar() {
             size="large"
             edge="start"
           >
-            <Badge badgeContent={4} color="secondary">
+            <Badge badgeContent={cartItemCount} color="secondary">
               <ShoppingCartIcon />
             </Badge>
           </IconButton>
