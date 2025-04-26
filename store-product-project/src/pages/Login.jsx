@@ -3,24 +3,40 @@ import {
   Avatar,
   Box,
   Button,
-  colors,
   Container,
   Paper,
   TextField,
   Typography,
 } from "@mui/material";
 import { useForm } from "react-hook-form";
+import requests from "../api/apiClient";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useUser } from "../context/UserContext";
 
 export default function LoginPage() {
+  const navigate = useNavigate();
+  const { updateUser } = useUser();
   const {
     register,
     handleSubmit,
     formState: { errors },
-    watch,
   } = useForm();
 
-  const username = watch("username");
-  const password = watch("password");
+  const onSubmit = (data) => {
+    requests.account
+      .login(data)
+      .then((res) => {
+        localStorage.setItem("user", JSON.stringify(res));
+        updateUser(res);
+        toast.success("Giriş başarılı!");
+        navigate("/");
+      })
+      .catch(() => {
+        toast.error("Kullanıcı adı veya şifre hatalı!");
+      });
+  };
 
   return (
     <Container maxWidth="xs">
@@ -36,16 +52,13 @@ export default function LoginPage() {
           Login
         </Typography>
         <Box
-          onSubmit={handleSubmit((data) => {
-            console.log(data);
-          })}
-          noValidate
           component="form"
+          onSubmit={handleSubmit(onSubmit)}
+          noValidate
           sx={{ mb: 2 }}
         >
           <TextField
-            {...register("username", { required: "Username zorunlu alan " })}
-            name="username"
+            {...register("username", { required: "Username zorunlu alan" })}
             label="Enter username"
             size="small"
             fullWidth
@@ -56,8 +69,7 @@ export default function LoginPage() {
             helperText={errors.username?.message}
           />
           <TextField
-            {...register("password", { required: "Password zorunlu alan " })}
-            name="password"
+            {...register("password", { required: "Password zorunlu alan" })}
             type="password"
             label="Enter password"
             size="small"
@@ -73,7 +85,6 @@ export default function LoginPage() {
             fullWidth
             sx={{ mt: 1 }}
             color="secondary"
-            disabled={!username || !password}
           >
             Submit
           </Button>

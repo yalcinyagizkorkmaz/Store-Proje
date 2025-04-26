@@ -11,6 +11,9 @@ import {
 import { useForm } from "react-hook-form";
 import requests from "../api/apiClient";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 export default function RegisterPage() {
   const navigate = useNavigate();
   const {
@@ -27,12 +30,16 @@ export default function RegisterPage() {
   function handleForm(data) {
     requests.account
       .register(data)
-      .then((result) => {
-        console.log(result);
+      .then(() => {
+        toast.success("Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz.");
         navigate("/login");
       })
       .catch((error) => {
-        console.log(error);
+        if (error.response && error.response.status === 400) {
+          toast.error("Bu kullanıcı adı veya email zaten kayıtlı!");
+        } else {
+          toast.error("Bir hata oluştu. Lütfen tekrar deneyin.");
+        }
       });
   }
 
